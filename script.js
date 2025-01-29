@@ -3,13 +3,24 @@ let min = 1;
 let humanScore = 0;
 let computerScore = 0;
 let stringComputer = "";
+let rounds = 5;
+let currentRound = 0;
+const body = document.querySelector("body");
+const scoreHuman = document.createElement("div");
+const scoreComputer = document.createElement("div");
 
 playGame();
 
-function computerChoice() {
-  //esta funcion genera un random entre 1 y 3, asocia el numero que sale Piedra,papel o tijera
-  //  y devuelve el stringComputer Piedra, Papel o tijera
+/// TERMINAR PLAY GAME
 
+function playRound(humanChoice, computerChoice) {
+  displayChoices(humanChoice, computerChoice);
+
+  let result = determineWinner(humanChoice, computerChoice);
+  displayScore(result);
+}
+
+function computerChoice() {
   let randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
 
   if (randomNumber === 1) {
@@ -23,61 +34,34 @@ function computerChoice() {
   return stringComputer;
 }
 
-function humanChoice() {
-  // esta funcion permite al usuario ingresar piedra papel o tijera en mayusculas, minusculas o combinado,
-  //la estandariza llamando a validate string y devuelve un stringUser con la palabra estandarizada.
-  let inputUser;
-  let stringUser;
-  do {
-    inputUser = prompt("Piedra, Papel o tijera?");
-  } while (!validateString(inputUser));
-  stringUser =
-    inputUser.charAt(0).toUpperCase() + inputUser.slice(1).toLocaleLowerCase();
-
-  return stringUser;
-}
-
-function validateString(string) {
-  if (
-    string.toUpperCase() === "PIEDRA" ||
-    string.toUpperCase() === "PAPEL" ||
-    string.toUpperCase() === "TIJERA"
-  )
-    return true;
-  else {
-    alert("Entrada inválida. Por favor, elige Piedra, Papel o Tijera.");
-    return false;
-  }
-}
-
 function playGame() {
-  for (let round = 1; round <= 5; round++) {
-    console.log(`Ronda: ${round}`);
-    playRound(humanChoice(), computerChoice());
-  }
-  console.log(
-    `El resultado final es Humano: ${humanScore} Computadora: ${computerScore}`
-  );
-}
-function playRound(humanChoice, computerChoice) {
-  // esta funcion llama a las funciones humanChoice y computerChoice. Estas dos ultimas se ejecutan trayendo como resultado los stringsUser y Compute.
-  // la funcion playRound imprime las elecciones y llama a determineWinner que entregará como resultado el ganador de la ronda, una vez comparados los strings.
-  // determina el ganador.
-  console.log(`Elección del usuario:`, humanChoice);
-  console.log(`Elección del la Computadora:`, computerChoice);
+  const choices = document.querySelectorAll(".choices");
 
-  let result = determineWinner(humanChoice, computerChoice);
+  choices.forEach((choice) => {
+    choice.addEventListener("click", () => {
+      if (currentRound < rounds) {
+        currentRound++;
+        playRound(choice.textContent, computerChoice());
 
-  if (result.includes("Ganaste")) {
-    humanScore++;
-    console.log(`SCORE: Humano: ${humanScore} Computadora: ${computerScore}`);
-  } else if (result.includes("Perdiste")) {
-    computerScore++;
-    console.log(`SCORE: Humano: ${humanScore} Computadora: ${computerScore}`);
-  } else
-    console.log(`SCORE: Humano: ${humanScore} Computadora: ${computerScore}`);
+        if (currentRound === rounds) {
+          declareWinner();
+        }
+      }
+    });
+  });
 }
+
+function displayChoices(humanChoice, computerChoice) {
+  const choicesDisplay = document.createElement("div");
+  body.appendChild(choicesDisplay);
+  choicesDisplay.textContent = `El usuario ha elegido ${humanChoice} y la PC ha elegido ${computerChoice}`;
+}
+
 function determineWinner(strUser, strComputer) {
+  const resultsDisplay = document.createElement("div");
+  resultsDisplay.style.marginBottom = "20px";
+  body.appendChild(resultsDisplay);
+
   let resultado;
 
   if (strUser === "Piedra") {
@@ -106,6 +90,35 @@ function determineWinner(strUser, strComputer) {
     }
   }
 
-  console.log(resultado);
+  resultsDisplay.textContent = resultado;
   return resultado;
+}
+
+function displayScore(result) {
+  const human = document.querySelector(".human");
+  const computer = document.querySelector(".computer");
+
+  human.appendChild(scoreHuman);
+  computer.appendChild(scoreComputer);
+
+  if (result.includes("Ganaste")) {
+    humanScore++;
+  } else if (result.includes("Perdiste")) {
+    computerScore++;
+  }
+  scoreHuman.textContent = humanScore;
+  scoreComputer.textContent = computerScore;
+}
+
+function declareWinner() {
+  const resultsDisplay = document.createElement("div");
+  body.appendChild(resultsDisplay);
+
+  if (humanScore > computerScore) {
+    resultsDisplay.textContent = `¡Ganaste el juego! 🏆 Humano: ${humanScore} - Computadora: ${computerScore}`;
+  } else if (computerScore > humanScore) {
+    resultsDisplay.textContent = `¡Perdiste el juego! 🤖 Humano: ${humanScore} - Computadora: ${computerScore}`;
+  } else {
+    resultsDisplay.textContent = `Es un empate 🤝 Humano: ${humanScore} - Computadora: ${computerScore}`;
+  }
 }
